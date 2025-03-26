@@ -136,7 +136,10 @@ class BalInfoController extends Controller
     private function handleResponse($response, $errorMessage)
     {
         if ($response->status() != 200) {
-            throw new \Exception($errorMessage . ': ' . json_encode($response->json()));
+            return response()->json([
+                'error' => $errorMessage,
+                'details' => $response->json(),
+            ], $response->status());
         }
 
         return $response->json();
