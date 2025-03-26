@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Http;
 
 class BalInfoController extends Controller
@@ -18,19 +19,33 @@ class BalInfoController extends Controller
         // Generate timestamp
         $timestamp = $this->getTimestamp();
 
-        // Step 1: Get Signature Auth
-        $signatureAuth = $this->getSignatureAuth($timestamp, $clientId, $privateKey);
+        try {
+            // Step 1: Get Signature Auth
+            $signatureAuth = $this->getSignatureAuth($timestamp, $clientId, $privateKey);
 
-        // Step 2: Get Access Token
-        $accessToken = $this->getAccessToken($timestamp, $clientId, $signatureAuth);
+            // Step 2: Get Access Token
+            $accessToken = $this->getAccessToken($timestamp, $clientId, $signatureAuth);
 
-        // Step 3: Get Signature Service
-        $signatureService = $this->getSignatureService($timestamp, $clientSecret, $accessToken);
+            // Step 3: Get Signature Service
+            $signatureService = $this->getSignatureService($timestamp, $clientSecret, $accessToken);
 
-        // Step 4: Perform Balance Inquiry
-        $balanceInfo = $this->getBalanceInfo($timestamp, $clientId, $accessToken, $signatureService);
+            // Step 4: Perform Balance Inquiry
+            $balanceInfo = $this->getBalanceInfo($timestamp, $clientId, $accessToken, $signatureService);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'data' => null,
+                'error' => $e->getMessage(),
+                'statusCode' => Response::HTTP_INTERNAL_SERVER_ERROR
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
-        return response()->json($balanceInfo);
+        return response()->json([
+            'message' => 'Success',
+            'data' => $balanceInfo,
+            'error' => null,
+            'statusCode' => Response::HTTP_OK
+        ], Response::HTTP_OK);
     }
 
     private function getTimestamp()
@@ -136,10 +151,7 @@ class BalInfoController extends Controller
     private function handleResponse($response, $errorMessage)
     {
         if ($response->status() != 200) {
-            return response()->json([
-                'error' => $errorMessage,
-                'details' => $response->json(),
-            ], $response->status());
+            throw new \Exception($errorMessage . ': ' . json_encode($response->json()));
         }
 
         return $response->json();
