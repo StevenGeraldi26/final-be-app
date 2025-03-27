@@ -26,4 +26,10 @@ Follow the steps below to set up the project after cloning the repository:
     php artisan key:generate
     ```
 
+5. **Start the Development Server**  
+    Start the development server using the following Artisan command:
+    ```bash
+    php artisan serve --port=8001
+    ```
+
 Your project is now set up and ready to use. Follow additional instructions in the documentation for further configuration or usage.
