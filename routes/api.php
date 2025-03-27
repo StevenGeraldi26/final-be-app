@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BalInfoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -23,3 +24,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('users/logout', [UserController::class, 'logout']);
     Route::post('informasi-saldo', [AccountController::class, 'getAccountInfo'])->middleware(['snap-bi']);
 });
+
+Route::get('/balinfo', [BalInfoController::class, 'index']);
